@@ -83,7 +83,7 @@ namespace Grains
                 {
                     if (resp.StatusCode != HttpStatusCode.OK)
                         _logger.Info("StatusCode={0}", resp.StatusCode);
-                    // TODO: log some more details about request result
+                    // TODO: log details about request result (response code, content length...)
                     ++_sentRequests;
                 }       
             }
@@ -99,6 +99,7 @@ namespace Grains
         /// <param name="o"></param>
         public async void ReportResults(object o)
         {
+            // TODO: report request details
             await _manager.ReportResults(_sentRequests);
             _sentRequests = 0;
         }

@@ -53,6 +53,7 @@ namespace Grains
         /// <returns></returns>
         public Task ReportResults(int results)
         {
+            // TODO: more complex aggregations (number response codes per type, average content length...)
             _totalSent += results;
             
             // Call the observer from time to time to report aggregated results
