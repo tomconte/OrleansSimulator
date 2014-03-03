@@ -7,7 +7,6 @@ using System.Net;
 using Orleans;
 using GrainInterfaces;
 using Orleans.RuntimeCore;
-using Microsoft.ServiceBus.Messaging;
 
 namespace Grains
 {
