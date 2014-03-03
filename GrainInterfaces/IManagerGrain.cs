@@ -9,7 +9,7 @@ namespace GrainInterfaces
 {
     public interface IManagerGrain : IGrain
     {
-        Task StartSimulators(ISimulationObserver observer);
+        Task StartSimulators(int start, int count, ISimulationObserver observer);
         Task ReportResults(int results);
     }
 }

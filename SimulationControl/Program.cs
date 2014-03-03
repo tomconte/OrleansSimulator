@@ -27,7 +27,11 @@ namespace SimulationControl
             _observer = await SimulationObserverFactory.CreateObjectReference(this);
 
             // Start the simulation
-            await manager.StartSimulators(_observer);
+            await manager.StartSimulators(0, 100, _observer);
+            await manager.StartSimulators(100, 100, _observer);
+            await manager.StartSimulators(200, 100, _observer);
+            //await manager.StartSimulators(300, 100, _observer);
+            //await manager.StartSimulators(400, 100, _observer);
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using System.Net;
 using Orleans;
 using GrainInterfaces;
 using Orleans.RuntimeCore;
+using Microsoft.ServiceBus.Messaging;
 
 namespace Grains
 {
@@ -20,6 +21,12 @@ namespace Grains
         IManagerGrain _manager;
         IOrleansTimer _reqtimer, _stattimer;
 
+        static int MAX_DELAY = 5; // seconds
+        static int PERIOD = 1; // seconds
+        static int REPORT_PERIOD = 5; // seconds
+
+        string _connectionString = "Endpoint=sb://telemetry.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=sb6Xokb9i6MyZfPAF/n7N3LVUHJwaFRdXuSD6SWksWY=;TransportType=Amqp";
+
         /// <summary>
         /// Grain activation.
         /// </summary>
@@ -27,6 +34,7 @@ namespace Grains
         public override Task ActivateAsync()
         {
             _logger = base.GetLogger("Simulator");
+
             return base.ActivateAsync();
         }
 
@@ -36,14 +44,18 @@ namespace Grains
         /// <param name="name"></param>
         /// <param name="manager"></param>
         /// <returns></returns>
-        public Task<string> StartSimulation(string name, IManagerGrain manager)
+        public Task StartSimulation(int id, IManagerGrain manager)
         {
             _manager = manager;
 
-            _reqtimer = RegisterTransientTimer(SendRequest, null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(1000));
-            _stattimer = RegisterTransientTimer(ReportResults, null, TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(2000));
-            
-            return Task.FromResult("Started " + name);
+            var rand = new Random();
+
+            _reqtimer = RegisterTransientTimer(SendRequest, null, TimeSpan.FromSeconds(rand.Next(MAX_DELAY)), TimeSpan.FromSeconds(PERIOD));
+            _stattimer = RegisterTransientTimer(ReportResults, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(REPORT_PERIOD));
+
+            _logger.Info("Started {0}", id);
+
+            return TaskDone.Done;
         }
 
         /// <summary>
@@ -64,13 +76,21 @@ namespace Grains
         /// <param name="o"></param>
         public async void SendRequest(object o)
         {
-            HttpWebRequest req = HttpWebRequest.CreateHttp("http://localhost/");
-            using (HttpWebResponse resp = await req.GetResponseAsync() as HttpWebResponse)
+            try
             {
-                if (resp.StatusCode != HttpStatusCode.OK)
-                    _logger.Info("StatusCode={0}", resp.StatusCode);
-                ++_sentRequests;
-            }            
+                HttpWebRequest req = HttpWebRequest.CreateHttp("http://arriis.cloudapp.net/");
+                using (HttpWebResponse resp = await req.GetResponseAsync() as HttpWebResponse)
+                {
+                    if (resp.StatusCode != HttpStatusCode.OK)
+                        _logger.Info("StatusCode={0}", resp.StatusCode);
+                    // TODO: log some more details about request result
+                    ++_sentRequests;
+                }       
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error: {0}", e);
+            }
         }
 
         /// <summary>

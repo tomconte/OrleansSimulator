@@ -9,7 +9,7 @@ namespace GrainInterfaces
 {
     public interface ISimulatorGrain : Orleans.IGrain
     {
-        Task<string> StartSimulation(string name, IManagerGrain managerGrain);
+        Task StartSimulation(int id, IManagerGrain managerGrain);
         Task StopSimulation();
     }
 }
