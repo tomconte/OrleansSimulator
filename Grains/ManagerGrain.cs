@@ -1,4 +1,20 @@
-﻿using Orleans;
+﻿//*********************************************************//
+//    Copyright (c) Microsoft. All rights reserved.
+//    
+//    Apache 2.0 License
+//    
+//    You may obtain a copy of the License at
+//    http://www.apache.org/licenses/LICENSE-2.0
+//    
+//    Unless required by applicable law or agreed to in writing, software 
+//    distributed under the License is distributed on an "AS IS" BASIS, 
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
+//    implied. See the License for the specific language governing 
+//    permissions and limitations under the License.
+//
+//*********************************************************
+
+using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,44 +22,90 @@ using System.Text;
 using System.Threading.Tasks;
 using GrainInterfaces;
 using System.Diagnostics;
+using System.Net;
 
 namespace Grains
 {
     public class ManagerGrain : GrainBase, IManagerGrain
     {
-        private ISimulationObserver _observer;
+        OrleansLogger _logger;
         private List<ISimulatorGrain> _sims = new List<ISimulatorGrain>();
-        private int _totalSent;
-        private Stopwatch _sw;
-        private long _lastreport;
+        List<List<HttpWebResponse>> _allResults = new List<List<HttpWebResponse>>();
+        private IAggregatorGrain _aggregator;
+        IOrleansTimer _stattimer;
 
         static int REPORT_PERIOD = 10; // seconds
+
+        public Task SetAggregator(IAggregatorGrain aggregator)
+        {
+            _aggregator = aggregator;
+            return TaskDone.Done;
+        }
+
+        public override Task ActivateAsync()
+        {
+            _logger = base.GetLogger("Manager");
+
+            return base.ActivateAsync();
+        }
 
         /// <summary>
         /// Instantiate simulator grains and start the simulation on each.
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        public async Task StartSimulators(int start, int count, ISimulationObserver observer)
+        public async Task StartSimulators(int count, string url)
         {
-            _observer = observer;
-
             List<Task> tasks = new List<Task>();
 
-            for (int i = start; i < start+count; i++)
+            long start = this.GetPrimaryKeyLong() * count;
+            for (long i = start; i < start + count; i++)
             {
                 ISimulatorGrain grainRef = SimulatorGrainFactory.GetGrain(i);
                 _sims.Add(grainRef);
-                tasks.Add(grainRef.StartSimulation(i, this));
+                tasks.Add(grainRef.StartSimulation(i, url, this));
+            }
+
+            await Task.WhenAll(tasks);  // wait until all grains have started
+
+            _logger.Info(count + " simulators started.");
+
+            _stattimer = RegisterTimer(ReportResults, null, 
+                    TimeSpan.FromSeconds(REPORT_PERIOD), TimeSpan.FromSeconds(REPORT_PERIOD));
+        }
+
+        /// <summary>
+        /// Stop all the simulator grains.
+        /// </summary>
+        /// <returns></returns>
+        public async Task StopSimulators()
+        {
+            List<Task> tasks = new List<Task>();
+
+            foreach (var i in _sims)
+            {
+                tasks.Add(i.StopSimulation());
             }
 
             await Task.WhenAll(tasks);
 
-            Console.WriteLine(count + " simulators started.");
+            _logger.Info(_sims.Count + " simulators stopped.");
+        }
 
-            _sw = new Stopwatch();
-            _sw.Start();
-            _lastreport = _sw.ElapsedMilliseconds;
+        public async Task ReportResults(object o)
+        {
+            var temp = new List<List<HttpWebResponse>>(_allResults);
+            _allResults.Clear();
+
+            var all = new List<HttpWebResponse>();
+            foreach (var i in temp)
+            {
+                all.AddRange(i);
+            }
+
+            // send the results back to the aggregator grain
+            if (_aggregator != null)
+                await _aggregator.AggregateResults(all);
         }
 
         /// <summary>
@@ -51,17 +113,9 @@ namespace Grains
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        public Task ReportResults(int results)
+        public Task SendResults(List<HttpWebResponse> results)
         {
-            // TODO: more complex aggregations (number response codes per type, average content length...)
-            _totalSent += results;
-            
-            // Call the observer from time to time to report aggregated results
-            if (_sw.ElapsedMilliseconds - _lastreport > REPORT_PERIOD * 1000)
-            {
-                _observer.ReportResults(_totalSent / (int)(_sw.ElapsedMilliseconds / 1000));
-                _lastreport = _sw.ElapsedMilliseconds;
-            }
+            _allResults.Add(results);
 
             return TaskDone.Done;
         }

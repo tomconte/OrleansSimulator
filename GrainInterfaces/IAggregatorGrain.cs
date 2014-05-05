@@ -14,18 +14,19 @@
 //
 //*********************************************************
 
+using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Net;
 using System.Text;
-using Orleans;
+using System.Threading.Tasks;
 
 namespace GrainInterfaces
 {
-    public interface ISimulatorGrain : Orleans.IGrain
+    public interface IAggregatorGrain : IGrain
     {
-        Task StartSimulation(long id, string url, IManagerGrain managerGrain);
-        Task StopSimulation();
+        Task SetObserver(ISimulationObserver observer);
+        Task AggregateResults(List<HttpWebResponse> results);
     }
 }

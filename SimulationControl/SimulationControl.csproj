@@ -33,10 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Orleans">
-      <HintPath>..\..\..\..\..\..\..\Orleans-SDK\Binaries\OrleansClient\Orleans.dll</HintPath>
-    </Reference>
-    <Reference Include="OrleansRuntimeGrainInterfaces">
-      <HintPath>..\..\..\..\..\..\..\Orleans-SDK\Binaries\OrleansClient\OrleansRuntimeGrainInterfaces.dll</HintPath>
+      <HintPath>$(OrleansSDK)\Binaries\OrleansClient\Orleans.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

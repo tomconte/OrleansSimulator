@@ -1,4 +1,20 @@
-﻿using System;
+﻿//*********************************************************//
+//    Copyright (c) Microsoft. All rights reserved.
+//    
+//    Apache 2.0 License
+//    
+//    You may obtain a copy of the License at
+//    http://www.apache.org/licenses/LICENSE-2.0
+//    
+//    Unless required by applicable law or agreed to in writing, software 
+//    distributed under the License is distributed on an "AS IS" BASIS, 
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
+//    implied. See the License for the specific language governing 
+//    permissions and limitations under the License.
+//
+//*********************************************************
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,7 +22,6 @@ using System.Text;
 using System.Net;
 using Orleans;
 using GrainInterfaces;
-using Orleans.RuntimeCore;
 
 namespace Grains
 {
@@ -15,16 +30,15 @@ namespace Grains
     /// </summary>
     public class SimulatorGrain : GrainBase, ISimulatorGrain
     {
-        int _sentRequests;
+        List<HttpWebResponse> _responses = new List<HttpWebResponse>();
         OrleansLogger _logger;
         IManagerGrain _manager;
         IOrleansTimer _reqtimer, _stattimer;
+        string _url;
 
         static int MAX_DELAY = 5; // seconds
         static int PERIOD = 1; // seconds
         static int REPORT_PERIOD = 5; // seconds
-
-        string _connectionString = "Endpoint=sb://telemetry.servicebus.windows.net/;SharedSecretIssuer=owner;SharedSecretValue=sb6Xokb9i6MyZfPAF/n7N3LVUHJwaFRdXuSD6SWksWY=;TransportType=Amqp";
 
         /// <summary>
         /// Grain activation.
@@ -43,16 +57,17 @@ namespace Grains
         /// <param name="name"></param>
         /// <param name="manager"></param>
         /// <returns></returns>
-        public Task StartSimulation(int id, IManagerGrain manager)
+        public Task StartSimulation(long id, string url, IManagerGrain manager)
         {
+            _url = url;
             _manager = manager;
 
             var rand = new Random();
 
-            _reqtimer = RegisterTransientTimer(SendRequest, null, TimeSpan.FromSeconds(rand.Next(MAX_DELAY)), TimeSpan.FromSeconds(PERIOD));
-            _stattimer = RegisterTransientTimer(ReportResults, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(REPORT_PERIOD));
-
-            _logger.Info("Started {0}", id);
+            _reqtimer = RegisterTimer(SendRequest, null, 
+                    TimeSpan.FromSeconds(rand.Next(MAX_DELAY)), TimeSpan.FromSeconds(PERIOD));
+            _stattimer = RegisterTimer(ReportResults, null, 
+                    TimeSpan.FromSeconds(REPORT_PERIOD), TimeSpan.FromSeconds(REPORT_PERIOD));
 
             return TaskDone.Done;
         }
@@ -73,22 +88,21 @@ namespace Grains
         /// Send an asynchronous request and await the response.
         /// </summary>
         /// <param name="o"></param>
-        public async void SendRequest(object o)
+        public async Task SendRequest(object o)
         {
             try
             {
-                HttpWebRequest req = HttpWebRequest.CreateHttp("http://arriis.cloudapp.net/");
-                using (HttpWebResponse resp = await req.GetResponseAsync() as HttpWebResponse)
-                {
-                    if (resp.StatusCode != HttpStatusCode.OK)
-                        _logger.Info("StatusCode={0}", resp.StatusCode);
-                    // TODO: log details about request result (response code, content length...)
-                    ++_sentRequests;
-                }       
+                // make http request 
+                HttpWebRequest req = HttpWebRequest.CreateHttp(_url);
+                var resp = await req.GetResponseAsync();
+                resp.Close();
+
+                // log the respomse 
+                _responses.Add((HttpWebResponse)resp);
             }
             catch (Exception e)
             {
-                _logger.Error("Error: {0}", e);
+                _logger.Error(0, "Error:", e);
             }
         }
 
@@ -96,11 +110,11 @@ namespace Grains
         /// Periodically report results to the manager grain.
         /// </summary>
         /// <param name="o"></param>
-        public async void ReportResults(object o)
+        public async Task ReportResults(object o)
         {
-            // TODO: report request details
-            await _manager.ReportResults(_sentRequests);
-            _sentRequests = 0;
+            var temp = new List<HttpWebResponse>(_responses);
+            _responses.Clear();
+            await _manager.SendResults(temp);
         }
     }
 }

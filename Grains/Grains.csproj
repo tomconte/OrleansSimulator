@@ -13,6 +13,11 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(OrleansSDK)\LocalSilo\OrleansHost.exe</StartProgram>
+    <StartWorkingDirectory>$(OrleansSDK)\LocalSilo</StartWorkingDirectory>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -47,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregatorGrain.cs" />
     <Compile Include="SimulatorGrain.cs" />
     <Compile Include="ManagerGrain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,11 +72,20 @@
   </PropertyGroup>
   <Import Project="$(OrleansSDK)\Binaries\OrleansClient\Orleans.SDK.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist C:\Orleans-SDK\LocalSilo (
-if not exist C:\Orleans-SDK\LocalSilo\Applications (md C:\Orleans-SDK\LocalSilo\Applications)
-if not exist  C:\Orleans-SDK\LocalSilo\Applications\WST (md  C:\Orleans-SDK\LocalSilo\Applications\WST)
-copy /y *.*  C:\Orleans-SDK\LocalSilo\Applications\WST\
-)</PostBuildEvent>
+    <PostBuildEvent>
+      if exist "$(OrleansSDK)\LocalSilo" (
+      if not exist "$(OrleansSDK)\LocalSilo\Applications" (md "$(OrleansSDK)\LocalSilo\Applications")
+      if not exist  "$(OrleansSDK)\LocalSilo\Applications\WST" (md "$(OrleansSDK)\LocalSilo\Applications\WST")
+      copy /y *.dll  "$(OrleansSDK)\LocalSilo\Applications\WST\"
+      copy /y *.pdb  "$(OrleansSDK)\LocalSilo\Applications\WST\"
+      )
+      if exist "$(OrleansSDK)\Binaries" (
+      if not exist "$(OrleansSDK)\Binaries\Applications" (md "$(OrleansSDK)\Binaries\Applications")
+      if not exist  "$(OrleansSDK)\Binaries\Applications\WST" (md "$(OrleansSDK)\Binaries\Applications\WST")
+      copy /y *.dll "$(OrleansSDK)\Binaries\Applications\WST\"
+      copy /y *.pdb "$(OrleansSDK)\Binaries\Applications\WST\"
+      )
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
