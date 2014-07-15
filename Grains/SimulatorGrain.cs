@@ -30,11 +30,14 @@ namespace Grains
     /// </summary>
     public class SimulatorGrain : GrainBase, ISimulatorGrain
     {
-        List<HttpWebResponse> _responses = new List<HttpWebResponse>();
         OrleansLogger _logger;
         IManagerGrain _manager;
         IOrleansTimer _reqtimer, _stattimer;
         string _url;
+
+        // Counters
+        int c_total_requests;
+        int c_failed_requests;
 
         static int MAX_DELAY = 5; // seconds
         static int PERIOD = 1; // seconds
@@ -97,8 +100,18 @@ namespace Grains
                 var resp = await req.GetResponseAsync();
                 resp.Close();
 
-                // log the respomse 
-                _responses.Add((HttpWebResponse)resp);
+                // log the response 
+                ++c_total_requests;
+            }
+            catch (WebException e)
+            {
+                WebExceptionStatus status = e.Status;
+                if (status == WebExceptionStatus.ProtocolError)
+                {
+                    HttpWebResponse resp = (HttpWebResponse)e.Response;
+                    if (((HttpWebResponse)resp).StatusCode != HttpStatusCode.OK)
+                        ++c_failed_requests;
+                }
             }
             catch (Exception e)
             {
@@ -112,9 +125,7 @@ namespace Grains
         /// <param name="o"></param>
         public async Task ReportResults(object o)
         {
-            var temp = new List<HttpWebResponse>(_responses);
-            _responses.Clear();
-            await _manager.SendResults(temp);
+            await _manager.SendResults(c_total_requests, c_failed_requests);
         }
     }
 }

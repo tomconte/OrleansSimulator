@@ -30,9 +30,14 @@ namespace Grains
     {
         OrleansLogger _logger;
         private List<ISimulatorGrain> _sims = new List<ISimulatorGrain>();
-        List<List<HttpWebResponse>> _allResults = new List<List<HttpWebResponse>>();
         private IAggregatorGrain _aggregator;
-        IOrleansTimer _stattimer;
+        IOrleansTimer _stattimer, _starttimer;
+        int _count;
+        string _url;
+
+        // Counters
+        int c_total_requests;
+        int c_failed_requests;
 
         static int REPORT_PERIOD = 10; // seconds
 
@@ -54,21 +59,31 @@ namespace Grains
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        public async Task StartSimulators(int count, string url)
+        public async Task StartSimulators(int delay, int count, string url)
+        {
+            _count = count;
+            _url = url;
+            _starttimer = RegisterTimer(StartSimulatorsDelayed, null, TimeSpan.FromSeconds(delay), TimeSpan.FromDays(1));
+        }
+
+        private async Task StartSimulatorsDelayed(object o)
         {
             List<Task> tasks = new List<Task>();
 
-            long start = this.GetPrimaryKeyLong() * count;
-            for (long i = start; i < start + count; i++)
+            // Stop the one-time timer
+            _starttimer.Dispose();
+
+            long start = this.GetPrimaryKeyLong() * _count;
+            for (long i = start; i < start + _count; i++)
             {
                 ISimulatorGrain grainRef = SimulatorGrainFactory.GetGrain(i);
                 _sims.Add(grainRef);
-                tasks.Add(grainRef.StartSimulation(i, url, this));
+                tasks.Add(grainRef.StartSimulation(i, _url, this));
             }
 
             await Task.WhenAll(tasks);  // wait until all grains have started
 
-            _logger.Info(count + " simulators started.");
+            _logger.Info(_count + " simulators started.");
 
             _stattimer = RegisterTimer(ReportResults, null, 
                     TimeSpan.FromSeconds(REPORT_PERIOD), TimeSpan.FromSeconds(REPORT_PERIOD));
@@ -94,18 +109,9 @@ namespace Grains
 
         public async Task ReportResults(object o)
         {
-            var temp = new List<List<HttpWebResponse>>(_allResults);
-            _allResults.Clear();
-
-            var all = new List<HttpWebResponse>();
-            foreach (var i in temp)
-            {
-                all.AddRange(i);
-            }
-
             // send the results back to the aggregator grain
             if (_aggregator != null)
-                await _aggregator.AggregateResults(all);
+                await _aggregator.AggregateResults(c_total_requests, c_failed_requests);
         }
 
         /// <summary>
@@ -113,9 +119,10 @@ namespace Grains
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        public Task SendResults(List<HttpWebResponse> results)
+        public Task SendResults(int total_requests, int failed_requests)
         {
-            _allResults.Add(results);
+            c_total_requests += total_requests;
+            c_failed_requests += failed_requests;
 
             return TaskDone.Done;
         }

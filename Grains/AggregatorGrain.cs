@@ -30,12 +30,14 @@ namespace Grains
     {
         private ISimulationObserver _observer;
         OrleansLogger _logger;
-        private int _totalSent, _totalErrors;
-        private long _totalSize;
         private Stopwatch _sw;
         IOrleansTimer _stattimer;
 
         static int REPORT_PERIOD = 30; // seconds
+
+        // Counters
+        private int c_total_requests, c_failed_requests;
+        private long _totalSize;
 
 
         // note where observer notifications are to be delivered to 
@@ -49,7 +51,7 @@ namespace Grains
         // report results as notication 
         public Task ReportResults(object o)
         {
-            _observer.ReportResults(_sw.ElapsedMilliseconds, _totalSent, _totalErrors, _totalSize);
+            _observer.ReportResults(_sw.ElapsedMilliseconds, c_total_requests, c_failed_requests, _totalSize);
             return TaskDone.Done;
         }
 
@@ -70,12 +72,11 @@ namespace Grains
 
 
 
-        public Task AggregateResults(List<HttpWebResponse> results)
+        public Task AggregateResults(int total_requests, int failed_requests)
         {
             // Simple aggregations examples
-            _totalSent += results.Count;
-            _totalErrors += results.Count(r => r.StatusCode != HttpStatusCode.OK);
-            _totalSize += results.Aggregate(0L, (t, n) => t + n.ContentLength);
+            c_total_requests += total_requests;
+            c_failed_requests += failed_requests;
 
             return TaskDone.Done;
         }

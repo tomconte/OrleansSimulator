@@ -13,6 +13,8 @@ Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "CloudSimulator", "SimWorker
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorHost", "SimulatorRole\SimulatorHost.csproj", "{A36CB0B1-152F-4CAB-A72E-B30FFA174403}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorUI", "SimulatorUI\SimulatorUI.csproj", "{0AB8C32A-76E9-4AA5-9B67-B81E3888F538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A36CB0B1-152F-4CAB-A72E-B30FFA174403}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A36CB0B1-152F-4CAB-A72E-B30FFA174403}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A36CB0B1-152F-4CAB-A72E-B30FFA174403}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AB8C32A-76E9-4AA5-9B67-B81E3888F538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AB8C32A-76E9-4AA5-9B67-B81E3888F538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AB8C32A-76E9-4AA5-9B67-B81E3888F538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AB8C32A-76E9-4AA5-9B67-B81E3888F538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

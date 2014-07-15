@@ -36,7 +36,7 @@ namespace SimulationControl
         const int BATCH_SIZE = 100;
         const int DELAY_STEPS = 15; // seconds
         const int RUN_TIME = 300; // seconds
-        const string URL = "http://myapplication.cloudapp.net/";  // Change to point to the web site under test
+        const string URL = "http://www.google.com/";  // Change to point to the web site under test
 
         /// <summary>
         /// Start the simulation via the controller grain.
@@ -62,9 +62,7 @@ namespace SimulationControl
                 managers.Add(manager);  // store grain reference 
 
                 await manager.SetAggregator(aggregator); // link in the aggregator
-                await manager.StartSimulators(BATCH_SIZE, URL);  // start the sinulation
-
-                Thread.Sleep(DELAY_STEPS * 1000);
+                await manager.StartSimulators(i*DELAY_STEPS*1000, BATCH_SIZE, URL);  // start the sinulation
             }
 
             // Sleep for the duration of the test

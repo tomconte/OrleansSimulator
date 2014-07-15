@@ -27,8 +27,8 @@ namespace GrainInterfaces
     public interface IManagerGrain : IGrain
     {
         Task SetAggregator(IAggregatorGrain aggregator);
-        Task StartSimulators(int count, string url);
+        Task StartSimulators(int delay, int count, string url);
         Task StopSimulators();
-        Task SendResults(List<HttpWebResponse> results);
+        Task SendResults(int total_requests, int failed_requests);
     }
 }

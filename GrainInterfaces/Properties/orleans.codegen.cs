@@ -111,10 +111,10 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 return base.InvokeMethodAsync<object>(903001954, new object[] {observer is GrainBase ? GrainInterfaces.SimulationObserverFactory.Cast(observer.AsReference()) : observer}, TimeSpan.Zero );
             }
             
-            public System.Threading.Tasks.Task AggregateResults(System.Collections.Generic.List<System.Net.HttpWebResponse> results)
+            public System.Threading.Tasks.Task AggregateResults(int total_requests, int failed_requests)
             {
 
-                return base.InvokeMethodAsync<object>(178043553, new object[] {results}, TimeSpan.Zero );
+                return base.InvokeMethodAsync<object>(-898034474, new object[] {total_requests, failed_requests}, TimeSpan.Zero );
             }
         }
     }
@@ -144,8 +144,8 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                             case 903001954: 
                                 await ((IAggregatorGrain)grain).SetObserver((ISimulationObserver)arguments[0]);
                               return true;
-                            case 178043553: 
-                                await ((IAggregatorGrain)grain).AggregateResults((System.Collections.Generic.List<System.Net.HttpWebResponse>)arguments[0]);
+                            case -898034474: 
+                                await ((IAggregatorGrain)grain).AggregateResults((Int32)arguments[0], (Int32)arguments[1]);
                               return true;
                             default: 
                                 throw new NotImplementedException("interfaceId="+interfaceId+",methodId="+methodId);
@@ -166,7 +166,7 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                     {
                         case 903001954:
                             return "SetObserver";
-                    case 178043553:
+                    case -898034474:
                             return "AggregateResults";
                     case -606142484:
                             return "GetProperties";
@@ -449,10 +449,10 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 return base.InvokeMethodAsync<object>(1756076699, new object[] {aggregator is GrainBase ? GrainInterfaces.AggregatorGrainFactory.Cast(aggregator.AsReference()) : aggregator}, TimeSpan.Zero );
             }
             
-            public System.Threading.Tasks.Task StartSimulators(int count, string url)
+            public System.Threading.Tasks.Task StartSimulators(int delay, int count, string url)
             {
 
-                return base.InvokeMethodAsync<object>(214267713, new object[] {count, url}, TimeSpan.Zero );
+                return base.InvokeMethodAsync<object>(981188829, new object[] {delay, count, url}, TimeSpan.Zero );
             }
             
             public System.Threading.Tasks.Task StopSimulators()
@@ -461,10 +461,10 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 return base.InvokeMethodAsync<object>(488722972, new object[] {}, TimeSpan.Zero );
             }
             
-            public System.Threading.Tasks.Task SendResults(System.Collections.Generic.List<System.Net.HttpWebResponse> results)
+            public System.Threading.Tasks.Task SendResults(int total_requests, int failed_requests)
             {
 
-                return base.InvokeMethodAsync<object>(-970343036, new object[] {results}, TimeSpan.Zero );
+                return base.InvokeMethodAsync<object>(-1507404422, new object[] {total_requests, failed_requests}, TimeSpan.Zero );
             }
         }
     }
@@ -494,14 +494,14 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                             case 1756076699: 
                                 await ((IManagerGrain)grain).SetAggregator((IAggregatorGrain)arguments[0]);
                               return true;
-                            case 214267713: 
-                                await ((IManagerGrain)grain).StartSimulators((Int32)arguments[0], (String)arguments[1]);
+                            case 981188829: 
+                                await ((IManagerGrain)grain).StartSimulators((Int32)arguments[0], (Int32)arguments[1], (String)arguments[2]);
                               return true;
                             case 488722972: 
                                 await ((IManagerGrain)grain).StopSimulators();
                               return true;
-                            case -970343036: 
-                                await ((IManagerGrain)grain).SendResults((System.Collections.Generic.List<System.Net.HttpWebResponse>)arguments[0]);
+                            case -1507404422: 
+                                await ((IManagerGrain)grain).SendResults((Int32)arguments[0], (Int32)arguments[1]);
                               return true;
                             default: 
                                 throw new NotImplementedException("interfaceId="+interfaceId+",methodId="+methodId);
@@ -522,11 +522,11 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                     {
                         case 1756076699:
                             return "SetAggregator";
-                    case 214267713:
+                    case 981188829:
                             return "StartSimulators";
                     case 488722972:
                             return "StopSimulators";
-                    case -970343036:
+                    case -1507404422:
                             return "SendResults";
                     case -606142484:
                             return "GetProperties";

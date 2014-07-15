@@ -27,6 +27,7 @@ namespace GrainInterfaces
     public interface IAggregatorGrain : IGrain
     {
         Task SetObserver(ISimulationObserver observer);
-        Task AggregateResults(List<HttpWebResponse> results);
+
+        Task AggregateResults(int total_requests, int failed_requests);
     }
 }
