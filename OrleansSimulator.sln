@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrainInterfaces", "GrainInt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grains", "Grains\Grains.csproj", "{7C51FFB5-606E-479D-B029-DA2AE3374BCA}"
 EndProject
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "SimWorker", "SimWorker\SimWorker.ccproj", "{30E75E58-3516-45BF-8AFA-227A23340802}"
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "CloudSimulator", "SimWorker\CloudSimulator.ccproj", "{30E75E58-3516-45BF-8AFA-227A23340802}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorRole", "SimulatorRole\SimulatorRole.csproj", "{A36CB0B1-152F-4CAB-A72E-B30FFA174403}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatorHost", "SimulatorRole\SimulatorHost.csproj", "{A36CB0B1-152F-4CAB-A72E-B30FFA174403}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

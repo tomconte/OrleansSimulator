@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ServiceDefinition name="SimWorker" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-01.2.3">
-  <WorkerRole name="SimulatorRole" vmsize="Medium">
+<ServiceDefinition name="CloudSimulator" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-01.2.3">
+  <WorkerRole name="SimulatorHost" vmsize="Medium">
     <Imports>
       <Import moduleName="Diagnostics" />
     </Imports>
