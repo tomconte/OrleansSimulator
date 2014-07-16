@@ -85,10 +85,10 @@ namespace SimulationControl
         /// <param name="sent"></param>
         /// <param name="errors"></param>
         /// <param name="size"></param>
-        public void ReportResults(long millis, int sent, int errors, long size)
+        public void ReportResults(long millis, int sent, int errors, Dictionary<long, int> all_sent, Dictionary<long, int> all_errors)
         {
             var avg = sent / (millis / 1000);
-            Console.WriteLine("avg req/s: {0} sent: {2} errors: {3} size: {4}", avg, millis, sent, errors, size);
+            Console.WriteLine("avg req/s: {0} sent: {2} errors: {3}", avg, millis, sent, errors);
         }
     }
 

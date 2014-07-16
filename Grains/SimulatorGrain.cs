@@ -22,6 +22,8 @@ using System.Text;
 using System.Net;
 using Orleans;
 using GrainInterfaces;
+using GPSTracker.Common;
+using System.IO;
 
 namespace Grains
 {
@@ -34,6 +36,12 @@ namespace Grains
         IManagerGrain _manager;
         IOrleansTimer _reqtimer, _stattimer;
         string _url;
+
+        // State
+        double cur_lat = 0, cur_long = 0;
+        Guid device_id;
+        double lat_speed, long_speed;
+        double speed_factor = 0.25;
 
         // Counters
         int c_total_requests;
@@ -50,6 +58,16 @@ namespace Grains
         public override Task ActivateAsync()
         {
             _logger = base.GetLogger("Simulator");
+
+            Random rand = new Random((int)this.GetPrimaryKeyLong());
+
+            cur_lat = (rand.NextDouble() - 0.5) * 10.0;
+            cur_long = (rand.NextDouble() - 0.5) * 10.0;
+            device_id = Guid.NewGuid();
+            lat_speed = rand.NextDouble() - 0.5;
+            long_speed = rand.NextDouble() - 0.5;
+
+            _logger.Info("*** simulator " + this.GetPrimaryKeyLong() + " starting " + cur_lat + " " + cur_long + " " + device_id);
 
             return base.ActivateAsync();
         }
@@ -93,10 +111,33 @@ namespace Grains
         /// <param name="o"></param>
         public async Task SendRequest(object o)
         {
+            // update state
+
+            cur_lat += lat_speed * speed_factor;
+            cur_long += long_speed * speed_factor;
+
             try
             {
+                // compute the device message
+                DeviceMessage msg = new DeviceMessage(cur_lat, cur_long, 0, device_id, DateTime.Now);
+                string msg_json = Newtonsoft.Json.JsonConvert.SerializeObject(msg);
+
                 // make http request 
+                ASCIIEncoding encoding = new ASCIIEncoding();
+                byte[] data = encoding.GetBytes(msg_json);
+
                 HttpWebRequest req = HttpWebRequest.CreateHttp(_url);
+                req.Method = "POST";
+                req.ContentType = "application/json";
+                req.ContentLength = data.Length;
+
+                Stream newStream = req.GetRequestStream();
+                newStream.Write(data, 0, data.Length);
+                newStream.Close();
+
+                _logger.Info("*** {0}-{1} sending request {2} {3}", _manager.GetPrimaryKeyLong(), this.GetPrimaryKeyLong(), cur_lat, cur_long);
+
+                // wait for response
                 var resp = await req.GetResponseAsync();
                 resp.Close();
 
@@ -105,6 +146,8 @@ namespace Grains
             }
             catch (WebException e)
             {
+                _logger.Error(0, "*** WebException: ", e);
+
                 WebExceptionStatus status = e.Status;
                 if (status == WebExceptionStatus.ProtocolError)
                 {
@@ -115,7 +158,7 @@ namespace Grains
             }
             catch (Exception e)
             {
-                _logger.Error(0, "Error:", e);
+                _logger.Error(0, "*** Exception: ", e);
             }
         }
 

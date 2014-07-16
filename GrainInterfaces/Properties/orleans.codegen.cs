@@ -23,6 +23,7 @@ namespace GrainInterfaces
     using System.IO;
     using System.Collections.Generic;
     using Orleans;
+    using System.Collections;
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Orleans-CodeGenerator", "1.0.814.60418")]
@@ -111,10 +112,10 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 return base.InvokeMethodAsync<object>(903001954, new object[] {observer is GrainBase ? GrainInterfaces.SimulationObserverFactory.Cast(observer.AsReference()) : observer}, TimeSpan.Zero );
             }
             
-            public System.Threading.Tasks.Task AggregateResults(int total_requests, int failed_requests)
+            public System.Threading.Tasks.Task AggregateResults(long id, int total_requests, int failed_requests)
             {
 
-                return base.InvokeMethodAsync<object>(-898034474, new object[] {total_requests, failed_requests}, TimeSpan.Zero );
+                return base.InvokeMethodAsync<object>(-638542766, new object[] {id, total_requests, failed_requests}, TimeSpan.Zero );
             }
         }
     }
@@ -144,8 +145,8 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                             case 903001954: 
                                 await ((IAggregatorGrain)grain).SetObserver((ISimulationObserver)arguments[0]);
                               return true;
-                            case -898034474: 
-                                await ((IAggregatorGrain)grain).AggregateResults((Int32)arguments[0], (Int32)arguments[1]);
+                            case -638542766: 
+                                await ((IAggregatorGrain)grain).AggregateResults((Int64)arguments[0], (Int32)arguments[1], (Int32)arguments[2]);
                               return true;
                             default: 
                                 throw new NotImplementedException("interfaceId="+interfaceId+",methodId="+methodId);
@@ -166,7 +167,7 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                     {
                         case 903001954:
                             return "SetObserver";
-                    case -898034474:
+                    case -638542766:
                             return "AggregateResults";
                     case -606142484:
                             return "GetProperties";
@@ -627,10 +628,10 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 return SimulationObserverReference.Cast(((Orleans.GrainReference)(GrainReference.DeserializeGrainReference(expected, stream))));
             }
             
-            public void ReportResults(long millis, int sent, int errors, long size)
+            public void ReportResults(long millis, int sent, int errors, System.Collections.Generic.Dictionary<System.Int64,System.Int32> all_sent, System.Collections.Generic.Dictionary<System.Int64,System.Int32> all_errors)
             {
 
-                base.InvokeOneWayMethod(1092526112, new object[] {millis, sent, errors, size} );
+                base.InvokeOneWayMethod(974898854, new object[] {millis, sent, errors, all_sent, all_errors} );
             }
         }
     }
@@ -657,8 +658,8 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                     case -2015988020:  // ISimulationObserver
                         switch (methodId)
                         {
-                            case 1092526112: 
-                                ((ISimulationObserver)grain).ReportResults((Int64)arguments[0], (Int32)arguments[1], (Int32)arguments[2], (Int64)arguments[3]); return true;
+                            case 974898854: 
+                                ((ISimulationObserver)grain).ReportResults((Int64)arguments[0], (Int32)arguments[1], (Int32)arguments[2], (System.Collections.Generic.Dictionary<Int64,Int32>)arguments[3], (System.Collections.Generic.Dictionary<Int64,Int32>)arguments[4]); return true;
                             default: 
                                 throw new NotImplementedException("interfaceId="+interfaceId+",methodId="+methodId);
                         }
@@ -676,7 +677,7 @@ GrainFactoryBase.CheckGrainObserverParamInternal(observer);
                 case -2015988020:  // ISimulationObserver
                     switch (methodId)
                     {
-                        case 1092526112:
+                        case 974898854:
                             return "ReportResults";
                     case -606142484:
                             return "GetProperties";

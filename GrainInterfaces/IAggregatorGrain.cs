@@ -28,6 +28,6 @@ namespace GrainInterfaces
     {
         Task SetObserver(ISimulationObserver observer);
 
-        Task AggregateResults(int total_requests, int failed_requests);
+        Task AggregateResults(long id, int total_requests, int failed_requests);
     }
 }

@@ -25,6 +25,6 @@ namespace GrainInterfaces
 {
     public interface ISimulationObserver : IGrainObserver
     {
-        void ReportResults(long millis, int sent, int errors, long size);
+        void ReportResults(long millis, int sent, int errors, Dictionary<long, int> all_sent, Dictionary<long, int> all_errors);
     }
 }

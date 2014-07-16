@@ -83,7 +83,7 @@ namespace Grains
 
             await Task.WhenAll(tasks);  // wait until all grains have started
 
-            _logger.Info(_count + " simulators started.");
+            _logger.Info("*** " + _count + " simulators started.");
 
             _stattimer = RegisterTimer(ReportResults, null, 
                     TimeSpan.FromSeconds(REPORT_PERIOD), TimeSpan.FromSeconds(REPORT_PERIOD));
@@ -109,9 +109,12 @@ namespace Grains
 
         public async Task ReportResults(object o)
         {
+            _logger.Info("*** manager {0} report results: total={1} failed={2}", this.GetPrimaryKeyLong(), c_total_requests, c_failed_requests);
             // send the results back to the aggregator grain
             if (_aggregator != null)
-                await _aggregator.AggregateResults(c_total_requests, c_failed_requests);
+                await _aggregator.AggregateResults(this.GetPrimaryKeyLong(), c_total_requests, c_failed_requests);
+            // zero out counter
+            c_total_requests = c_failed_requests = 0;
         }
 
         /// <summary>

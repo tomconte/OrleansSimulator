@@ -33,11 +33,12 @@ namespace Grains
         private Stopwatch _sw;
         IOrleansTimer _stattimer;
 
-        static int REPORT_PERIOD = 30; // seconds
+        static int REPORT_PERIOD = 3; // seconds
 
         // Counters
         private int c_total_requests, c_failed_requests;
-        private long _totalSize;
+        Dictionary<long, int> all_total_requests = new Dictionary<long,int>();
+        Dictionary<long, int> all_failed_requests = new Dictionary<long, int>();
 
 
         // note where observer notifications are to be delivered to 
@@ -51,7 +52,9 @@ namespace Grains
         // report results as notication 
         public Task ReportResults(object o)
         {
-            _observer.ReportResults(_sw.ElapsedMilliseconds, c_total_requests, c_failed_requests, _totalSize);
+            _logger.Info("*** aggregator report results: " + c_total_requests + " " + c_failed_requests);
+            // Send results to Observer
+            _observer.ReportResults(_sw.ElapsedMilliseconds, c_total_requests, c_failed_requests, all_total_requests, all_failed_requests);
             return TaskDone.Done;
         }
 
@@ -72,11 +75,21 @@ namespace Grains
 
 
 
-        public Task AggregateResults(int total_requests, int failed_requests)
+        public Task AggregateResults(long id, int total_requests, int failed_requests)
         {
             // Simple aggregations examples
             c_total_requests += total_requests;
             c_failed_requests += failed_requests;
+
+            // Counters per manager id
+            if (!all_total_requests.ContainsKey(id))
+                all_total_requests.Add(id, 0);
+
+            if (!all_failed_requests.ContainsKey(id))
+                all_failed_requests.Add(id, 0);
+            
+            all_total_requests[id] += total_requests;
+            all_failed_requests[id] += failed_requests;
 
             return TaskDone.Done;
         }

@@ -9,51 +9,41 @@ using System.Web.Mvc;
 
 namespace SimulatorUI.Controllers
 {
-    public class SimulationController : Controller, ISimulationObserver
+    public class SimulationController : Controller
     {
-        ISimulationObserver observer;
-        List<IManagerGrain> managers = new List<IManagerGrain>();
-
-        const int BATCH_COUNT = 1;
-        const int BATCH_SIZE = 100;
-        const int DELAY_STEPS = 15; // seconds
-        const int RUN_TIME = 300; // seconds
-        const string URL = "http://localhost:4000/";  // Change to point to the web site under test
-
-        // GET: Simulation
-        public ActionResult Index()
+       public ActionResult Index()
         {
+            ViewBag.sent = MvcApplication.GlobalObserver.c_sent;
             return View();
         }
 
         public async Task<ActionResult> Start()
         {
+            int batch_count = int.Parse(Request.Params["batchcount"]);
+            int batch_size = int.Parse(Request.Params["batchsize"]);
+            int delay = int.Parse(Request.Params["delay"]);
+            int runtime = int.Parse(Request.Params["runtime"]);
+            string url = Request.Params["testurl"];
+
             // create an aggregator grain to track results from the load test
             IAggregatorGrain aggregator = AggregatorGrainFactory.GetGrain(0);
 
             // set this SimulationController class as an observer on the aggregator grain
-            observer = await SimulationObserverFactory.CreateObjectReference(this);  // convert our class into a grain reference
+            ISimulationObserver observer = await SimulationObserverFactory.CreateObjectReference(MvcApplication.GlobalObserver);  // convert our class into a grain reference
             await aggregator.SetObserver(observer);  // then set ourselves up to receive notifications on ReportResults()
 
             // Instantiate the manager grains and start the simulations
             // Pause between each batch to ramp up load gradually
-            for (int i = 0; i < BATCH_COUNT; i++)
+            for (int i = 0; i < batch_count; i++)
             {
                 Console.WriteLine("Starting batch #{0}", i + 1);
                 IManagerGrain manager = ManagerGrainFactory.GetGrain(i);
-                managers.Add(manager);  // store grain reference 
 
                 await manager.SetAggregator(aggregator); // link in the aggregator
-                await manager.StartSimulators(i*DELAY_STEPS*1000, BATCH_SIZE, URL);  // start the sinulation
+                await manager.StartSimulators(i*delay, batch_size, url);  // start the simulation
             }
 
             return RedirectToAction("index");
-        }
-
-        public void ReportResults(long millis, int sent, int errors, long size)
-        {
-            var avg = sent / (millis / 1000);
-            Console.WriteLine("avg req/s: {0} sent: {2} errors: {3} size: {4}", avg, millis, sent, errors, size);
         }
     }
 }
