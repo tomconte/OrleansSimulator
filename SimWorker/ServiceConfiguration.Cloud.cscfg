@@ -3,15 +3,15 @@
   <Role name="SimulatorHost">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=HUyfnzWoJ1r5B5SHJYtib4qfV4Mi16R3DouLqqDsoVe5dX7l2RKAGFD5j0h1wWsFKGbbjQRCd7TPWgLx6b+LrA==" />
-      <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=HUyfnzWoJ1r5B5SHJYtib4qfV4Mi16R3DouLqqDsoVe5dX7l2RKAGFD5j0h1wWsFKGbbjQRCd7TPWgLx6b+LrA==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=xxx" />
+      <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=xxx" />
     </ConfigurationSettings>
   </Role>
   <Role name="SimulatorUI">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=HUyfnzWoJ1r5B5SHJYtib4qfV4Mi16R3DouLqqDsoVe5dX7l2RKAGFD5j0h1wWsFKGbbjQRCd7TPWgLx6b+LrA==" />
-      <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=HUyfnzWoJ1r5B5SHJYtib4qfV4Mi16R3DouLqqDsoVe5dX7l2RKAGFD5j0h1wWsFKGbbjQRCd7TPWgLx6b+LrA==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=xxx" />
+      <Setting name="DataConnectionString" value="DefaultEndpointsProtocol=https;AccountName=tcontems;AccountKey=xxx" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
